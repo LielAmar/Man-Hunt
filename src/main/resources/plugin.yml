@@ -1,0 +1,15 @@
+name: ManHunt
+version: 1.0
+author: LielAmar
+main: com.lielamar.manhunt.ManHunt
+description: A simple manhunt plugin
+
+commands:
+  manhunt:
+    description: Start/Stop manhunt
+    aliases: [mh]
+
+permissions:
+  manhunt.command:
+    default: op
+    description: access to the manhunt command

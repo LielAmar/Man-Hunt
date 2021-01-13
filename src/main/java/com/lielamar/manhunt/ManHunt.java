@@ -1,6 +1,7 @@
 package com.lielamar.manhunt;
 
-import com.packetmanager.lielamar.PacketManager;
+import net.md_5.bungee.api.ChatMessageType;
+import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.*;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -14,6 +15,7 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.CompassMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class ManHunt extends JavaPlugin implements Listener, CommandExecutor {
@@ -38,18 +40,23 @@ public class ManHunt extends JavaPlugin implements Listener, CommandExecutor {
 	public void onUpdate(PlayerInteractEvent event) {
 		if(target == null) return;
 		if(event.getPlayer() == target) return;
+		if(event.getPlayer().getInventory().getItemInMainHand().getType() != Material.COMPASS) return;
 
 		if(event.getPlayer().getWorld() != target.getWorld()) {
 			if(lastWorldLocation != null && event.getPlayer().getWorld().getEnvironment().equals(World.Environment.NORMAL))
 				event.getPlayer().setCompassTarget(lastWorldLocation);
 			else if(lastNetherLocation != null && event.getPlayer().getWorld().getEnvironment().equals(World.Environment.NETHER))
 				event.getPlayer().setCompassTarget(lastNetherLocation);
-			PacketManager.sendActionbar(event.getPlayer(), ChatColor.RED + "Could not track " + target.getName() + "!");
+			event.getPlayer().spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText(ChatColor.RED + "Could not track " + target.getName() + "!"));
 			return;
 		}
 
-		PacketManager.sendActionbar(event.getPlayer(), ChatColor.YELLOW + "Tracking " + target.getName() + "!");
+		event.getPlayer().spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText(ChatColor.YELLOW + "Tracking " + target.getName() + "!"));
 		event.getPlayer().setCompassTarget(target.getLocation());
+		CompassMeta meta = (CompassMeta)event.getPlayer().getInventory().getItemInMainHand().getItemMeta();
+		meta.setLodestone(target.getLocation());
+		event.getPlayer().getInventory().getItemInMainHand().setItemMeta(meta);
+		event.getPlayer().updateInventory();
 	}
 
 	@EventHandler
